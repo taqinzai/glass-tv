@@ -14,14 +14,25 @@ android {
         versionName '2.3'
     }
 
+    // One fixed key for every build, so a new APK from CI installs over the last one on the TV (a fresh CI
+    // runner would otherwise sign with a new random debug key). Only for this sideloaded TV app: not a secret.
+    signingConfigs {
+        sideload {
+            storeFile file('glass-tv-sideload.keystore')
+            storePassword 'glasstv'
+            keyAlias 'glasstv'
+            keyPassword 'glasstv'
+        }
+    }
+
     buildTypes {
         release {
             // R8 strips and optimises the code (AndroidX included): smaller APK, faster start on a slow TV CPU.
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Sideloaded over ADB, never published: sign with the debug key so it installs over a debug build.
-            signingConfig signingConfigs.debug
+            // Sideloaded over ADB, never published: signed with the fixed sideload key above.
+            signingConfig signingConfigs.sideload
         }
     }
 
