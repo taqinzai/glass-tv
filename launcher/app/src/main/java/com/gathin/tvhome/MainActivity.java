@@ -129,6 +129,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView btnWifi;
     private TextView shamsiDate;
     private boolean shamsi;
+    /** Today's prayer times (prayer_zone): the line under the clock, the zone, and the day it was read for. */
+    private TextView prayerView;
+    private String prayerZone = "";
+    private int[] prayerMins;
+    private int prayerDay = -1;
+    private boolean prayerLoading;
     private String vpnApp;
     private SpringAnimation springX, springY;
     private float glassTargetX, glassTargetY;
@@ -231,6 +237,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         @Override
         public void run() {
             updateShamsiDate();
+            updatePrayerTimes();
             updateWifiLabel();
             refreshPlacesIfDue();
             handler.postDelayed(this, MINUTE_MS);
@@ -291,6 +298,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
         btnWifi = findViewById(R.id.btnWifi);
         if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
+        prayerView = findViewById(R.id.prayerTimes);
+        prayerZone = cfg.prayerZone;
         shamsiDate = findViewById(R.id.shamsiDate);
         shamsi = cfg.shamsiDate;
         if (shamsi) {
@@ -669,6 +678,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         resuming = true;
         reloadApps(true);
         updateShamsiDate();
+        updatePrayerTimes();
         updateWifiLabel();
         updateInputsButton();
         startWallpaperRotation();
@@ -1460,6 +1470,70 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void updateShamsiDate() {
         if (shamsi) shamsiDate.setText(Shamsi.today());
+    }
+
+    /**
+     * Prayer times under the clock. The month's JAKIM timetable is read (and, when it lacks today,
+     * fetched) on a worker thread once a day; every minute only the highlight moves.
+     */
+    private void updatePrayerTimes() {
+        if (prayerZone.isEmpty()) return;
+        int day = java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_YEAR);
+        if (prayerMins != null && prayerDay == day) {
+            showPrayerTimes();
+            return;
+        }
+        if (prayerLoading) return;
+        prayerLoading = true;
+        final File dir = Config.dir(this);
+        final String zone = prayerZone;
+        new Thread(() -> {
+            int[] t = null;
+            try {
+                PrayerTimes.refreshIfNeeded(dir, zone);
+                t = PrayerTimes.today(dir, zone);
+            } catch (Exception e) {
+                android.util.Log.w("TvHome.Prayer", "prayer times: " + e);
+            }
+            final int[] times = t;
+            handler.post(() -> {
+                prayerLoading = false;
+                prayerMins = times;
+                prayerDay = times != null ? day : -1;
+                showPrayerTimes();
+            });
+        }, "prayer-times").start();
+    }
+
+    private void showPrayerTimes() {
+        if (prayerMins == null) {
+            prayerView.setVisibility(View.GONE);
+            return;
+        }
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        int next = PrayerTimes.nextIndex(prayerMins, now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE));
+        boolean h24 = android.text.format.DateFormat.is24HourFormat(this);
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder();
+        for (int i = 0; i < prayerMins.length; i++) {
+            if (i > 0) sb.append("      ");
+            int hh = prayerMins[i] / 60, mm = prayerMins[i] % 60;
+            if (!h24) hh = hh % 12 == 0 ? 12 : hh % 12;
+            String label = PrayerTimes.LABELS[i].toUpperCase(java.util.Locale.ROOT);
+            String time = String.format(java.util.Locale.ROOT, "%d:%02d", hh, mm);
+            boolean hot = i == next;
+            int start = sb.length();
+            sb.append(label);
+            sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFC66B : 0x99FFFFFF),
+                    start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.setSpan(new android.text.style.RelativeSizeSpan(0.8f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.append("  ");
+            start = sb.length();
+            sb.append(time);
+            sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFFFFF : 0xCCFFFFFF),
+                    start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        if (!android.text.TextUtils.equals(prayerView.getText(), sb)) prayerView.setText(sb);
+        prayerView.setVisibility(View.VISIBLE);
     }
 
     /** Shows the Wi-Fi network name on the button when we can read it, otherwise the connection type. */

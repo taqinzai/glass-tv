@@ -31,6 +31,7 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `columns` | 1 to 8 | Tiles per row; tiles shrink to fit from 5 up |
 | `rows_below_dock` | 0 to 3 | Grid rows left visible under the dock |
 | `shamsi_date` | bool | Show the Solar Hijri date above the Gregorian one |
+| `prayer_zone` | string | JAKIM zone for the prayer-times line under the clock, e.g. `"TRG01"` (Kuala Terengganu), `"WLY01"` (Kuala Lumpur); `""` hides it. Times come from JAKIM e-Solat, fetched once a month |
 | `module_cards` | bool | Look for module cards and ask about them (`true`); `false` turns the feature off |
 | `reduced_motion` | bool | Calmer motion for weak GPUs: stiff highlight spring, no tile overshoot, short fades, no entrance replay |
 | `vpn_app` | string | App the network pill opens when a VPN is configured; also shows a red "VPN off" badge while no VPN is up |

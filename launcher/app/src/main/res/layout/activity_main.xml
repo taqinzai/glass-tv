@@ -182,6 +182,27 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Today's prayer times (prayer_zone), under the clock across the top bar; the next one is
+                 highlighted. Its own row, so the top buttons stay level with the clock. -->
+            <TextView
+                android:id="@+id/prayerTimes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/leftBlock"
+                android:layout_marginTop="14dp"
+                android:gravity="left"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:textColor="#99FFFFFF"
+                android:textSize="15sp"
+                android:fontFamily="@font/outfit"
+                android:fontVariationSettings="'wght' 400"
+                android:letterSpacing="0.06"
+                android:shadowColor="#80000000"
+                android:shadowRadius="6"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/topButtons"
                 android:layout_width="wrap_content"
