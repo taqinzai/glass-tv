@@ -132,6 +132,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** Today's prayer times (prayer_zone): the line under the clock, the zone, and the day it was read for. */
     private TextView prayerView;
     private String prayerZone = "";
+    private boolean prayerArabic, azanOn;
     private int[] prayerMins;
     private int prayerDay = -1;
     private boolean prayerLoading;
@@ -300,6 +301,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
         prayerView = findViewById(R.id.prayerTimes);
         prayerZone = cfg.prayerZone;
+        prayerArabic = cfg.prayerArabic;
+        azanOn = cfg.azan;
         shamsiDate = findViewById(R.id.shamsiDate);
         shamsi = cfg.shamsiDate;
         if (shamsi) {
@@ -601,10 +604,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** Fetches the week's places in the background, then switches the rotation to them. */
     private void refreshPlacesIfDue() {
-        if (!placesMode || placesRefreshRunning || !PlaceWallpapers.due(this)) return;
+        if (!placesMode || placesRefreshRunning || config == null || !PlaceWallpapers.due(this, config.placesTheme)) return;
         placesRefreshRunning = true;
+        final String theme = config.placesTheme;
         new Thread(() -> {
-            boolean changed = PlaceWallpapers.refresh(getApplicationContext());
+            boolean changed = PlaceWallpapers.refresh(getApplicationContext(), theme);
             handler.post(() -> {
                 placesRefreshRunning = false;
                 if (!changed || isDestroyed()) return;
@@ -1501,6 +1505,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 prayerMins = times;
                 prayerDay = times != null ? day : -1;
                 showPrayerTimes();
+                // Once a day (and whenever Home starts): the next azan, from the timetable just read.
+                if (azanOn) AzanAlarm.schedule(this);
             });
         }, "prayer-times").start();
     }
@@ -1515,17 +1521,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         boolean h24 = android.text.format.DateFormat.is24HourFormat(this);
         android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder();
         for (int i = 0; i < prayerMins.length; i++) {
-            if (i > 0) sb.append("     ");
-            int hh = prayerMins[i] / 60, mm = prayerMins[i] % 60;
-            if (!h24) hh = hh % 12 == 0 ? 12 : hh % 12;
-            String label = PrayerTimes.LABELS[i].toUpperCase(java.util.Locale.ROOT);
-            String time = String.format(java.util.Locale.ROOT, "%d:%02d", hh, mm);
+            if (i > 0) sb.append(prayerArabic ? "      " : "     ");
+            String label = prayerArabic ? PrayerTimes.LABELS_AR[i] : PrayerTimes.LABELS[i].toUpperCase(java.util.Locale.ROOT);
+            String time = PrayerTimes.format(prayerMins[i], h24, prayerArabic);
             boolean hot = i == next;
             int start = sb.length();
             sb.append(label);
             sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFD54F : 0xE6FFFFFF),
                     start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            sb.setSpan(new android.text.style.RelativeSizeSpan(0.72f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.setSpan(new android.text.style.RelativeSizeSpan(prayerArabic ? 1f : 0.72f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             if (hot) sb.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.append("  ");
             start = sb.length();

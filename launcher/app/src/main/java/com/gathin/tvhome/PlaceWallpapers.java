@@ -51,7 +51,62 @@ final class PlaceWallpapers {
             + "|kayakers?|soldiers?|guards?|vendors?|shoppers?|players?|fans)\\b", Pattern.CASE_INSENSITIVE);
 
     /** Raised whenever the rules for which pictures are kept change. */
-    private static final int RULES = 1;
+    private static final int RULES = 2;
+
+    /** Wikimedia asks every client to name itself. */
+    static final String WIKIMEDIA_UA = "GlassTV/1.0 (https://github.com/taqinzai/glass-tv)";
+    private static final String C = "https://upload.wikimedia.org/wikipedia/commons/";
+    private static final String T = "https://thumb.wikimedia.org/wikipedia/commons/thumb/";
+
+    /**
+     * places_theme "islamic": mosques, each a picture from Wikimedia Commons under a free licence,
+     * credited on the shelf. {picture, name, description, where, credit}. Fetched once, not weekly.
+     */
+    static final String[][] ISLAMIC = {
+            {T + "b/b8/Edited_Great_Mosque_of_Mecca1_5-2019-ccsa4.0_%28cropped%29.jpg/1920px-Edited_Great_Mosque_of_Mecca1_5-2019-ccsa4.0_%28cropped%29.jpg",
+                    "Masjidil Haram", "Masjid paling suci dalam Islam, mengelilingi Kaabah, kiblat umat Islam di seluruh dunia.",
+                    "Makkah, Arab Saudi", "Saudipics.com, CC BY-SA 4.0"},
+            {T + "0/0c/Masjid_Nabawi_The_Prophet%27s_Mosque%2C_Madina.jpg/1920px-Masjid_Nabawi_The_Prophet%27s_Mosque%2C_Madina.jpg",
+                    "Masjid Nabawi", "Masjid yang dibina oleh Rasulullah SAW, tempat baginda dimakamkan di bawah Kubah Hijau.",
+                    "Madinah, Arab Saudi", "Muhammad Mahdi Karim, GFDL 1.2"},
+            {T + "8/87/Jerusalem-2013-Temple_Mount-Al-Aqsa_Mosque_%28NE_exposure%29.jpg/1920px-Jerusalem-2013-Temple_Mount-Al-Aqsa_Mosque_%28NE_exposure%29.jpg",
+                    "Masjid al-Aqsa", "Kiblat pertama umat Islam dan tempat Israk Rasulullah SAW.",
+                    "Baitulmaqdis, Palestin", "Godot13, CC BY-SA 4.0"},
+            {T + "1/1b/Jerusalem_DomeoftheRock_J65_%28cropped%29.JPG/1920px-Jerusalem_DomeoftheRock_J65_%28cropped%29.JPG",
+                    "Kubah as-Sakhrah", "Kubah emas di perkarangan Masjid al-Aqsa, dibina pada tahun 691 Masihi.",
+                    "Baitulmaqdis, Palestin", "Ludvig14, CC BY-SA 4.0"},
+            {C + "8/85/Cristal_Mosque_in_Kuala_Terengganu.jpg",
+                    "Masjid Kristal", "Masjid berbingkai keluli dan kaca di Taman Tamadun Islam, Pulau Wan Man.",
+                    "Kuala Terengganu, Malaysia", "emrank (Flickr), CC BY 2.0"},
+            {C + "3/3f/Floating_Mosque.jpg",
+                    "Masjid Tengku Tengah Zaharah", "Dikenali sebagai Masjid Terapung, di muara Sungai Ibai.",
+                    "Kuala Ibai, Terengganu", "bbbsheep, CC BY 2.0"},
+            {T + "1/16/Masjid_Putra%2C_Putrajaya%2C_Malaysia.jpg/1920px-Masjid_Putra%2C_Putrajaya%2C_Malaysia.jpg",
+                    "Masjid Putra", "Masjid berkubah merah jambu di tepi Tasik Putrajaya.",
+                    "Putrajaya, Malaysia", "CC BY 4.0"},
+            {T + "1/1f/National_Mosque_of_Malaysia%2C_Kuala_Lumpur_2026.jpg/1920px-National_Mosque_of_Malaysia%2C_Kuala_Lumpur_2026.jpg",
+                    "Masjid Negara", "Masjid nasional Malaysia dengan bumbung berbentuk payung, dirasmikan pada tahun 1965.",
+                    "Kuala Lumpur, Malaysia", "Santaria Fi, CC BY 4.0"},
+            {C + "e/e3/Ubudiah_Mosque%2C_circa_2023.jpg",
+                    "Masjid Ubudiah", "Masjid diraja berkubah keemasan, siap dibina pada tahun 1917.",
+                    "Kuala Kangsar, Perak", "Linken-nightmare, CC0"},
+            {C + "4/4b/SA_Blue_Mosque.jpg",
+                    "Masjid Sultan Salahuddin Abdul Aziz", "Dikenali sebagai Masjid Biru, antara masjid terbesar di Malaysia.",
+                    "Shah Alam, Selangor", "Lerdsuwa, CC BY-SA 3.0"},
+            {T + "0/03/Istanbul_%2834223582516%29_%28cropped%29.jpg/1920px-Istanbul_%2834223582516%29_%28cropped%29.jpg",
+                    "Masjid Sultan Ahmed", "Masjid Biru Istanbul dengan enam menara, siap pada tahun 1616.",
+                    "Istanbul, Turki", "Pedro Szekely, CC BY-SA 2.0"},
+            {T + "c/c8/Badshahi_Mosque_front_picture.jpg/1920px-Badshahi_Mosque_front_picture.jpg",
+                    "Masjid Badshahi", "Masjid zaman Mughal yang siap dibina pada tahun 1673.",
+                    "Lahore, Pakistan", "Romero Maia, CC BY-SA 4.0"},
+            {T + "e/e0/Ali_Mujtaba_WLM2017_FAISAL_MOSQUE_019.jpg/1920px-Ali_Mujtaba_WLM2017_FAISAL_MOSQUE_019.jpg",
+                    "Masjid Faisal", "Masjid berbentuk khemah di kaki Bukit Margalla, siap pada tahun 1986.",
+                    "Islamabad, Pakistan", "Ali Mujtaba, CC BY-SA 4.0"},
+            {C + "b/b2/Great_Mosque_of_Kairouan_Panorama_-_Grande_Mosqu%C3%A9e_de_Kairouan_Panorama.jpg",
+                    "Masjid Agung Kairouan", "Antara masjid tertua di Afrika Utara, diasaskan pada tahun 670 Masihi.",
+                    "Kairouan, Tunisia", "Marek Szarejko, CC BY-SA 2.0"},
+    };
+    private static final long RETRY_MS = 30 * 60_000L;
 
     private PlaceWallpapers() {
     }
@@ -74,12 +129,57 @@ final class PlaceWallpapers {
         return out;
     }
 
-    /** True when a week has passed since the last successful refresh, or there are no pictures yet. */
-    static boolean due(Context ctx) {
-        long last = prefs(ctx).getLong("refreshed_at", 0);
-        // Pictures kept under earlier rules are fetched again once, under the current ones.
-        if (prefs(ctx).getInt("rules", 0) < RULES) return true;
-        return System.currentTimeMillis() - last >= REFRESH_MS || list(ctx).isEmpty();
+    /**
+     * True when the pictures should be fetched: none yet, another theme or older rules, or (Bing) a
+     * week has passed. A failed fetch waits half an hour before the next try.
+     */
+    static boolean due(Context ctx, String theme) {
+        SharedPreferences p = prefs(ctx);
+        long now = System.currentTimeMillis();
+        if (now - p.getLong("failed_at", 0) < RETRY_MS) return false;
+        if (p.getInt("rules", 0) < RULES || !theme.equals(p.getString("theme", "bing"))) return true;
+        if (list(ctx).isEmpty()) return true;
+        return !"islamic".equals(theme) && now - p.getLong("refreshed_at", 0) >= REFRESH_MS;
+    }
+
+    /** Fetches the pictures for that theme in place of the ones on disk. Blocking. */
+    static boolean refresh(Context ctx, String theme) {
+        boolean ok = "islamic".equals(theme) ? refreshIslamic(ctx) : refresh(ctx);
+        SharedPreferences.Editor e = prefs(ctx).edit();
+        if (ok) e.putString("theme", theme).putLong("failed_at", 0);
+        else e.putLong("failed_at", System.currentTimeMillis());
+        e.apply();
+        return ok;
+    }
+
+    /** The mosques in ISLAMIC, each with its name, a line about it and the photo's credit. */
+    private static boolean refreshIslamic(Context ctx) {
+        File d = dir(ctx);
+        if (d == null) return false;
+        File fresh = new File(d.getParentFile(), DIR + ".new");
+        deleteAll(fresh);
+        if (!fresh.mkdirs()) return false;
+        int n = 0;
+        for (String[] p : ISLAMIC) {
+            try {
+                byte[] jpg = get(p[0], 4 * 1024 * 1024, WIKIMEDIA_UA);
+                String base = String.format(Locale.ROOT, "%02d", n++);
+                write(new File(fresh, base + ".jpg"), jpg);
+                write(new File(fresh, base + ".txt"), (p[1] + "\n" + p[2] + "  ·  Foto: " + p[4] + "\n" + p[3])
+                        .getBytes(StandardCharsets.UTF_8));
+            } catch (Exception e) {
+                Log.w(TAG, "skipped " + p[1] + ": " + e);
+            }
+        }
+        // Most of them in is good enough; the rest come with the next theme change or rules bump.
+        if (n < ISLAMIC.length / 2) {
+            deleteAll(fresh);
+            return false;
+        }
+        deleteAll(d);
+        if (!fresh.renameTo(d)) return false;
+        prefs(ctx).edit().putLong("refreshed_at", System.currentTimeMillis()).putInt("rules", RULES).apply();
+        return true;
     }
 
     /**
@@ -263,14 +363,18 @@ final class PlaceWallpapers {
     }
 
     private static byte[] get(String url, int maxBytes) throws Exception {
+        return get(url, maxBytes, null);
+    }
+
+    private static byte[] get(String url, int maxBytes, String userAgent) throws Exception {
         HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
         c.setConnectTimeout(15000);
         c.setReadTimeout(20000);
         c.setRequestProperty("Accept", "application/json, image/jpeg");
         // Asked as Android's own HTTP client, Bing answers with today's picture only; as a browser,
         // with the whole week.
-        c.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 10; TV) AppleWebKit/537.36 "
-                + "(KHTML, like Gecko) Chrome/120.0 Safari/537.36");
+        c.setRequestProperty("User-Agent", userAgent != null ? userAgent
+                : "Mozilla/5.0 (Linux; Android 10; TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36");
         try {
             if (c.getResponseCode() != 200) throw new IllegalStateException("HTTP " + c.getResponseCode());
             try (InputStream in = c.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {

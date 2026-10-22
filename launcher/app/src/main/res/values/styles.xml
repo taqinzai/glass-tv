@@ -10,6 +10,13 @@
         <item name="android:windowDisablePreview">true</item>
     </style>
 
+    <!-- The azan screen: see-through, so what was playing shows dimmed behind it. -->
+    <style name="Theme.TvHome.Azan" parent="android:Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
     <!-- Frosted pill, tvOS style. -->
     <style name="TopButtonBase">
         <item name="android:layout_width">wrap_content</item>

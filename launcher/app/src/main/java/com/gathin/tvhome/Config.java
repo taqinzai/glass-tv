@@ -66,6 +66,13 @@ final class Config {
     final int cacheCleanDays;
     /** JAKIM prayer-time zone (e.g. TRG01) shown under the clock; empty hides the prayer times. */
     final String prayerZone;
+    /** Prayer names in Arabic with Arabic-Indic digits (prayer_arabic). */
+    final boolean prayerArabic;
+    /** Play the azan at each prayer time (azan), and the sound to download for it (azan_url). */
+    final boolean azan;
+    final String azanUrl;
+    /** Which places: "islamic" (mosques, PlaceWallpapers.ISLAMIC) or "bing" (Bing's weekly pictures). */
+    final String placesTheme;
     /** Whether the overlay file was present and parsed. */
     final boolean overlayApplied;
 
@@ -76,7 +83,8 @@ final class Config {
                    boolean showHomeSettingsShortcut, boolean showNetworkPill, boolean showLiveTv,
                    int backgroundColor,
                    File wallpaper, List<File> wallpapers, long wallpaperIntervalMs,
-                   boolean places, int cacheCleanDays, String prayerZone, boolean overlayApplied) {
+                   boolean places, int cacheCleanDays, String prayerZone, boolean prayerArabic, boolean azan,
+                   String azanUrl, String placesTheme, boolean overlayApplied) {
         this.dockApps = Collections.unmodifiableList(dockApps);
         this.hiddenApps = Collections.unmodifiableList(hiddenApps);
         this.liveTvPackage = liveTvPackage;
@@ -100,6 +108,10 @@ final class Config {
         this.places = places;
         this.cacheCleanDays = cacheCleanDays;
         this.prayerZone = prayerZone;
+        this.prayerArabic = prayerArabic;
+        this.azan = azan;
+        this.azanUrl = azanUrl;
+        this.placesTheme = placesTheme;
         this.overlayApplied = overlayApplied;
     }
 
@@ -127,6 +139,10 @@ final class Config {
         boolean networkPill = res.getBoolean(R.bool.show_network_pill);
         boolean liveTvRow = res.getBoolean(R.bool.show_live_tv);
         String prayerZone = res.getString(R.string.prayer_zone).trim();
+        boolean prayerArabic = res.getBoolean(R.bool.prayer_arabic);
+        boolean azan = res.getBoolean(R.bool.azan);
+        String azanUrl = res.getString(R.string.azan_url).trim();
+        String placesTheme = res.getString(R.string.places_theme).trim();
         int background = 0xFF000000;
         boolean applied = false;
 
@@ -153,6 +169,10 @@ final class Config {
             liveTvRow = bool(json, "show_live_tv", liveTvRow);
             background = color(json, "background_color", background);
             prayerZone = string(json, "prayer_zone", prayerZone).trim().toUpperCase(java.util.Locale.ROOT);
+            prayerArabic = bool(json, "prayer_arabic", prayerArabic);
+            azan = bool(json, "azan", azan);
+            azanUrl = string(json, "azan_url", azanUrl);
+            placesTheme = string(json, "places_theme", placesTheme).toLowerCase(java.util.Locale.ROOT);
         }
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
@@ -179,7 +199,7 @@ final class Config {
         return new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
                 Math.max(1, columns), Math.max(0, rowsBelow), shamsi, moduleCards, reducedMotion,
                 vpn, homeSettings, networkPill, liveTvRow, background, wallpaper, wallpapers, wallpaperIntervalMs,
-                places, cacheCleanDays, prayerZone, applied);
+                places, cacheCleanDays, prayerZone, prayerArabic, azan, azanUrl, placesTheme, applied);
     }
 
     /** Reads and parses the overlay; any problem means "no overlay", never a crash on the home screen. */

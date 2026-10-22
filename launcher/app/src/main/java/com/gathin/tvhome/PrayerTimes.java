@@ -28,6 +28,7 @@ final class PrayerTimes {
     /** JAKIM's keys, in the order shown on Home. */
     static final String[] KEYS = {"fajr", "dhuhr", "asr", "maghrib", "isha"};
     static final String[] LABELS = {"Subuh", "Zohor", "Asar", "Maghrib", "Isyak"};
+    static final String[] LABELS_AR = {"الصبح", "الظهر", "العصر", "المغرب", "العشاء"};
     /** JAKIM writes dates as 22-Okt-2026, with Malay month abbreviations. */
     private static final String[] MONTHS = {"jan", "feb", "mac", "apr", "mei", "jun", "jul", "ogo", "sep", "okt", "nov", "dis"};
     private static final Pattern DATE = Pattern.compile("\"date\"\\s*:\\s*\"(\\d{1,2})-([A-Za-z]{3})-(\\d{4})\"");
@@ -75,9 +76,31 @@ final class PrayerTimes {
 
     /** Today's times from the cached month, or null when the cache does not have today. */
     static int[] today(File dir, String zone) {
-        Calendar c = Calendar.getInstance();
+        return day(dir, zone, Calendar.getInstance());
+    }
+
+    /** The times for that day from the cached month, or null when the cache does not have it. */
+    static int[] day(File dir, String zone, Calendar c) {
         return parseDay(read(cacheFile(dir, zone)),
                 c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
+    }
+
+    /** Western digits as Arabic-Indic ones (٠١٢٣٤٥٦٧٨٩). */
+    static String arabicDigits(String s) {
+        StringBuilder b = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            b.append(ch >= '0' && ch <= '9' ? (char) ('\u0660' + (ch - '0')) : ch);
+        }
+        return b.toString();
+    }
+
+    /** "5:44" or "17:44" (or Arabic-Indic digits) for minutes after midnight. */
+    static String format(int mins, boolean h24, boolean arabic) {
+        int hh = mins / 60, mm = mins % 60;
+        if (!h24) hh = hh % 12 == 0 ? 12 : hh % 12;
+        String t = String.format(java.util.Locale.ROOT, "%d:%02d", hh, mm);
+        return arabic ? arabicDigits(t) : t;
     }
 
     /**

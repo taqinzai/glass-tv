@@ -48,4 +48,12 @@ public class PrayerTimesTest {
         assertEquals(3, PrayerTimes.nextIndex(t, 1000));
         assertEquals(0, PrayerTimes.nextIndex(t, 1300));   // after Isyak: tomorrow's Subuh
     }
+
+    @Test
+    public void arabicTimes() {
+        assertEquals("\u0665:\u0664\u0664", PrayerTimes.format(5 * 60 + 44, false, true));
+        assertEquals("8:03", PrayerTimes.format(20 * 60 + 3, false, false));
+        assertEquals("20:03", PrayerTimes.format(20 * 60 + 3, true, false));
+        assertEquals("12:54", PrayerTimes.format(12 * 60 + 54, false, false));
+    }
 }

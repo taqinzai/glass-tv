@@ -64,7 +64,7 @@
             android:fontVariationSettings="'wght' 300"
             android:lineSpacingExtra="2dp"
             android:includeFontPadding="false"
-            android:maxLines="2"
+            android:maxLines="3"
             android:ellipsize="end"
             android:visibility="gone" />
     </LinearLayout>
