@@ -1515,7 +1515,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         boolean h24 = android.text.format.DateFormat.is24HourFormat(this);
         android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder();
         for (int i = 0; i < prayerMins.length; i++) {
-            if (i > 0) sb.append("      ");
+            if (i > 0) sb.append("     ");
             int hh = prayerMins[i] / 60, mm = prayerMins[i] % 60;
             if (!h24) hh = hh % 12 == 0 ? 12 : hh % 12;
             String label = PrayerTimes.LABELS[i].toUpperCase(java.util.Locale.ROOT);
@@ -1523,14 +1523,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             boolean hot = i == next;
             int start = sb.length();
             sb.append(label);
-            sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFC66B : 0x99FFFFFF),
+            sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFD54F : 0xE6FFFFFF),
                     start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            sb.setSpan(new android.text.style.RelativeSizeSpan(0.8f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.setSpan(new android.text.style.RelativeSizeSpan(0.72f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (hot) sb.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.append("  ");
             start = sb.length();
             sb.append(time);
-            sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFFFFF : 0xCCFFFFFF),
+            sb.setSpan(new android.text.style.ForegroundColorSpan(hot ? 0xFFFFD54F : 0xFFFFFFFF),
                     start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (hot) sb.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         if (!android.text.TextUtils.equals(prayerView.getText(), sb)) prayerView.setText(sb);
         prayerView.setVisibility(View.VISIBLE);
