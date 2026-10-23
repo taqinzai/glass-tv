@@ -22,6 +22,7 @@ final class Speaker {
     private static final long SETTLE_MS = 180;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private TextToSpeech tts;
+    private final Context appContext;
     private boolean ready;
     private String pending;
     private String last;
@@ -33,6 +34,7 @@ final class Speaker {
     };
 
     Speaker(Context ctx, String language) {
+        appContext = ctx.getApplicationContext();
         final Locale wanted = language == null || language.isEmpty() ? Locale.ENGLISH : Locale.forLanguageTag(language);
         tts = new TextToSpeech(ctx.getApplicationContext(), status -> {
             if (status != TextToSpeech.SUCCESS) {
@@ -54,12 +56,20 @@ final class Speaker {
 
     /** Says the text after the selection has settled; the same text twice in a row is said once. */
     void say(CharSequence text) {
-        if (tts == null || text == null) return;
+        if (tts == null || text == null || screenReaderOn()) return;
         String s = text.toString().trim();
         if (s.isEmpty()) return;
         pending = s;
         handler.removeCallbacks(say);
         handler.postDelayed(say, SETTLE_MS);
+    }
+
+    /** TalkBack (or another screen reader) already says what is focused: stay quiet, so nothing is said twice. */
+    private boolean screenReaderOn() {
+        android.view.accessibility.AccessibilityManager am = (android.view.accessibility.AccessibilityManager)
+                appContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        return am != null && am.isEnabled() && !am.getEnabledAccessibilityServiceList(
+                android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_SPOKEN).isEmpty();
     }
 
     /** Says it even when it was the last thing said (Home coming back to the same app). */
