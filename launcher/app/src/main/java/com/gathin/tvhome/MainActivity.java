@@ -299,6 +299,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // the height it happened to have beforehand is what let a tall block run into the dock.
         heroShelf.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, orr, ob) -> {
             if (heroBottom > 0) v.setY(heroBottom - v.getHeight());
+            fitHeroDesc();
         });
         btnWifi = findViewById(R.id.btnWifi);
         if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
@@ -1479,6 +1480,24 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     // ---- top bar ---------------------------------------------------------------------------------
 
+    /**
+     * The place's description gets only the lines that fit between the dock and the prayer-times
+     * bar, so a long one never runs up into the bar (none at all when even one line would).
+     */
+    private void fitHeroDesc() {
+        if (heroBottom <= 0 || prayerView == null || prayerView.getVisibility() != View.VISIBLE
+                || heroDesc.getVisibility() != View.VISIBLE || prayerView.getHeight() == 0) return;
+        int[] at = new int[2], rootAt = new int[2];
+        prayerView.getLocationInWindow(at);
+        root.getLocationInWindow(rootAt);
+        float limit = at[1] - rootAt[1] + prayerView.getHeight() + 10 * density;
+        android.view.ViewGroup.MarginLayoutParams lp = (android.view.ViewGroup.MarginLayoutParams) heroDesc.getLayoutParams();
+        float fixed = heroShelf.getHeight() - heroDesc.getHeight() - lp.topMargin;
+        float room = heroBottom - limit - fixed - lp.topMargin;
+        int lines = Math.max(0, Math.min(3, (int) (room / heroDesc.getLineHeight())));
+        if (heroDesc.getMaxLines() != lines) heroDesc.setMaxLines(lines);
+    }
+
     private void updateShamsiDate() {
         if (shamsi) shamsiDate.setText(Shamsi.today());
     }
@@ -1547,6 +1566,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         if (!android.text.TextUtils.equals(prayerView.getText(), sb)) prayerView.setText(sb);
         prayerView.setVisibility(View.VISIBLE);
+        prayerView.post(this::fitHeroDesc);
     }
 
     /** Shows the Wi-Fi network name on the button when we can read it, otherwise the connection type. */
