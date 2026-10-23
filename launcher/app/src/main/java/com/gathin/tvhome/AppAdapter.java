@@ -58,7 +58,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     }
 
     static final class Entry {
-        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2;
+        static final int APP = 0, HOME_SETTINGS = 1, CARD = 2, YOUTUBE = 3;
 
         final int kind;
         final String label;
@@ -124,6 +124,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
     private final Set<String> hidden;
     private final boolean showHomeSettings;
+    /** Tiles that play a YouTube channel (youtube_shortcuts): {name, channel id}. */
+    private final List<String[]> shortcuts;
     /** Calmer motion for weak GPUs (config.xml, reduced_motion): no overshoot, shorter fades. */
     private final boolean reducedMotion;
     private final List<Entry> items = new ArrayList<>();
@@ -140,6 +142,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         this.favourites = cfg.dockApps;
         this.hidden = new HashSet<>(cfg.hiddenApps);
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
+        this.shortcuts = cfg.youtubeShortcuts;
         this.reducedMotion = cfg.reducedMotion;
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
         // its view being rebound to whatever app now sits in that slot.
@@ -193,6 +196,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             parts.add(ri.activityInfo.packageName + '/' + ri.activityInfo.name + '@'
                     + ri.activityInfo.applicationInfo.sourceDir);
         }
+        for (String[] s : shortcuts) parts.add("~" + s[0] + '|' + s[1]);
         for (Cards.Card c : cards) {
             parts.add('#' + c.pkg + '/' + c.component.flattenToShortString() + '|' + c.label + '|'
                     + c.caption + '|' + c.accent);
@@ -233,6 +237,19 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             }
         }
         builtApps = apps;
+        // Channel tiles: YouTube's own icon with the channel's name, keyed "youtube:<channel id>" so
+        // dock_apps and Move can place them like any app.
+        if (!shortcuts.isEmpty()) {
+            Drawable yt = null;
+            try {
+                yt = pm.getApplicationIcon(YouTubeShortcut.YOUTUBE_TV);
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+            for (String[] s : shortcuts) {
+                fresh.add(new Entry(Entry.YOUTUBE, s[0], new ComponentName(YouTubeShortcut.PREFIX + s[1], "channel"),
+                        null, yt, null, 0xFFE53935));
+            }
+        }
         Map<String, Integer> place = new HashMap<>();
         for (int i = 0; i < arranged.size(); i++) place.put(arranged.get(i), i);
         Collections.sort(fresh, (a, b) -> {
@@ -349,7 +366,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     }
 
     private void openAppInfo(Entry e) {
-        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + e.pkg));
+        String pkg = e.kind == Entry.YOUTUBE ? YouTubeShortcut.YOUTUBE_TV : e.pkg;
+        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + pkg));
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             ctx.startActivity(i);
@@ -393,6 +411,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         if (e.kind == Entry.HOME_SETTINGS) {
             ctx.startActivity(new Intent(ctx, HomeSettingsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            return;
+        }
+        if (e.kind == Entry.YOUTUBE) {
+            YouTubeShortcut.play(ctx, e.pkg.substring(YouTubeShortcut.PREFIX.length()), e.label);
             return;
         }
         Intent i = new Intent(Intent.ACTION_MAIN)

@@ -38,6 +38,7 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `places_theme` | string | `"islamic"` (mosques) or `"bing"` (Bing's weekly places) |
 | `speak_names` | bool | Say aloud the app or button the remote moves to |
 | `speak_language` | string | Language of the spoken names: `"en"` (default) or `"ms"` |
+| `youtube_shortcuts` | list | Tiles that play a YouTube channel's newest video, then its other uploads: `[{"name": "Quran Time", "channel": "UC…"}]`. Place them with `dock_apps` as `"youtube:UC…"` |
 | `module_cards` | bool | Look for module cards and ask about them (`true`); `false` turns the feature off |
 | `reduced_motion` | bool | Calmer motion for weak GPUs: stiff highlight spring, no tile overshoot, short fades, no entrance replay |
 | `vpn_app` | string | App the network pill opens when a VPN is configured; also shows a red "VPN off" badge while no VPN is up |

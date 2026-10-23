@@ -77,6 +77,8 @@ final class Config {
     final boolean speakNames;
     /** The voice's language for speak_names, a tag such as "en" or "ms". */
     final String speakLanguage;
+    /** Tiles that play a YouTube channel: {name, channel id} from "youtube_shortcuts". */
+    final List<String[]> youtubeShortcuts;
     /** Whether the overlay file was present and parsed. */
     final boolean overlayApplied;
 
@@ -88,7 +90,8 @@ final class Config {
                    int backgroundColor,
                    File wallpaper, List<File> wallpapers, long wallpaperIntervalMs,
                    boolean places, int cacheCleanDays, String prayerZone, boolean prayerArabic, boolean azan,
-                   String azanUrl, String placesTheme, boolean speakNames, String speakLanguage, boolean overlayApplied) {
+                   String azanUrl, String placesTheme, boolean speakNames, String speakLanguage,
+                   List<String[]> youtubeShortcuts, boolean overlayApplied) {
         this.dockApps = Collections.unmodifiableList(dockApps);
         this.hiddenApps = Collections.unmodifiableList(hiddenApps);
         this.liveTvPackage = liveTvPackage;
@@ -118,6 +121,7 @@ final class Config {
         this.placesTheme = placesTheme;
         this.speakNames = speakNames;
         this.speakLanguage = speakLanguage;
+        this.youtubeShortcuts = Collections.unmodifiableList(youtubeShortcuts);
         this.overlayApplied = overlayApplied;
     }
 
@@ -151,6 +155,7 @@ final class Config {
         String placesTheme = res.getString(R.string.places_theme).trim();
         boolean speakNames = res.getBoolean(R.bool.speak_names);
         String speakLanguage = res.getString(R.string.speak_language).trim();
+        List<String[]> ytShortcuts = new ArrayList<>();
         int background = 0xFF000000;
         boolean applied = false;
 
@@ -183,6 +188,14 @@ final class Config {
             placesTheme = string(json, "places_theme", placesTheme).toLowerCase(java.util.Locale.ROOT);
             speakNames = bool(json, "speak_names", speakNames);
             speakLanguage = string(json, "speak_language", speakLanguage);
+            // [{"name": "Quran Time", "channel": "UC..."}]
+            JSONArray yt = json.optJSONArray("youtube_shortcuts");
+            for (int i = 0; yt != null && i < yt.length() && i < 8; i++) {
+                JSONObject o = yt.optJSONObject(i);
+                if (o == null) continue;
+                String name = o.optString("name", "").trim(), channel = o.optString("channel", "").trim();
+                if (!name.isEmpty() && channel.matches("UC[A-Za-z0-9_-]{22}")) ytShortcuts.add(new String[]{name, channel});
+            }
         }
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
@@ -209,7 +222,7 @@ final class Config {
         return new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
                 Math.max(1, columns), Math.max(0, rowsBelow), shamsi, moduleCards, reducedMotion,
                 vpn, homeSettings, networkPill, liveTvRow, background, wallpaper, wallpapers, wallpaperIntervalMs,
-                places, cacheCleanDays, prayerZone, prayerArabic, azan, azanUrl, placesTheme, speakNames, speakLanguage, applied);
+                places, cacheCleanDays, prayerZone, prayerArabic, azan, azanUrl, placesTheme, speakNames, speakLanguage, ytShortcuts, applied);
     }
 
     /** Reads and parses the overlay; any problem means "no overlay", never a crash on the home screen. */
