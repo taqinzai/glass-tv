@@ -11,18 +11,14 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           exec > probe-out.txt 2>&1
-          curl -s "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=Qhs1HZ7paAI&format=json"; echo
-          P=$(curl -sL -H "Accept-Language: en" "https://www.youtube.com/watch?v=Qhs1HZ7paAI")
-          echo "$P" | grep -o '"channelId":"[^"]*"' | sort -u | head
-          echo "$P" | grep -o '"ownerChannelName":"[^"]*"' | head -2
-          echo "$P" | grep -o '"isLiveContent":[a-z]*' | head -2
-          CID=$(echo "$P" | grep -o '"channelId":"[^"]*"' | head -1 | cut -d'"' -f4)
-          echo "== feed $CID"
-          curl -s "https://www.youtube.com/feeds/videos.xml?channel_id=$CID" | grep -o '<title>[^<]*</title>\|<yt:videoId>[^<]*' | head -20
-          echo "== uploads playlist"
-          curl -s "https://www.youtube.com/feeds/videos.xml?playlist_id=UU${CID:2}" | grep -o '<title>[^<]*</title>' | head -3
-          echo "== live"
-          curl -sL -H "Accept-Language: en" "https://www.youtube.com/channel/$CID/live" | grep -o '"isLive":true\|"isLiveNow":true\|<link rel="canonical" href="[^"]*"' | sort -u | head
+          H=$(curl -sL -H "Accept-Language: en" "https://www.youtube.com/@myqurantime")
+          echo "$H" | grep -o '<link rel="canonical" href="[^"]*"' | head -1
+          echo "$H" | grep -o '"externalId":"[^"]*"' | head -1
+          for C in UCoV78AClgq3dygpsC6IUbDA UCsxC_RuP5MtEz62aV-ukROQ; do
+            echo "== $C"
+            curl -s -o f.xml -w '%{http_code}\n' "https://www.youtube.com/feeds/videos.xml?channel_id=$C"; grep -o '<title>[^<]*</title>\|<yt:videoId>[^<]*' f.xml | head -8
+            curl -s -o g.xml -w 'pl %{http_code}\n' "https://www.youtube.com/feeds/videos.xml?playlist_id=UU${C:2}"; grep -o '<title>[^<]*</title>' g.xml | head -2
+          done
       - run: |
           git config user.name taqinzai; git config user.email muttaqin300804@gmail.com
           git add probe-out.txt && git commit -m "probe output" && git push -f origin HEAD:probe
