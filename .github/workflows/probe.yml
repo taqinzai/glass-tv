@@ -1,0 +1,28 @@
+name: probe
+on:
+  push:
+    branches: [probe]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          exec > probe-out.txt 2>&1
+          curl -s "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=Qhs1HZ7paAI&format=json"; echo
+          P=$(curl -sL -H "Accept-Language: en" "https://www.youtube.com/watch?v=Qhs1HZ7paAI")
+          echo "$P" | grep -o '"channelId":"[^"]*"' | sort -u | head
+          echo "$P" | grep -o '"ownerChannelName":"[^"]*"' | head -2
+          echo "$P" | grep -o '"isLiveContent":[a-z]*' | head -2
+          CID=$(echo "$P" | grep -o '"channelId":"[^"]*"' | head -1 | cut -d'"' -f4)
+          echo "== feed $CID"
+          curl -s "https://www.youtube.com/feeds/videos.xml?channel_id=$CID" | grep -o '<title>[^<]*</title>\|<yt:videoId>[^<]*' | head -20
+          echo "== uploads playlist"
+          curl -s "https://www.youtube.com/feeds/videos.xml?playlist_id=UU${CID:2}" | grep -o '<title>[^<]*</title>' | head -3
+          echo "== live"
+          curl -sL -H "Accept-Language: en" "https://www.youtube.com/channel/$CID/live" | grep -o '"isLive":true\|"isLiveNow":true\|<link rel="canonical" href="[^"]*"' | sort -u | head
+      - run: |
+          git config user.name taqinzai; git config user.email muttaqin300804@gmail.com
+          git add probe-out.txt && git commit -m "probe output" && git push -f origin HEAD:probe
