@@ -133,6 +133,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView prayerView;
     private String prayerZone = "";
     private boolean prayerArabic, azanOn;
+    /** Says the name of the app or button the remote moves to (speak_names); null when off. */
+    private Speaker speaker;
     private int[] prayerMins;
     private int prayerDay = -1;
     private boolean prayerLoading;
@@ -269,6 +271,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         else launch.edit().putLong("boot_at", bootAt).apply();
         root.setBackgroundColor(cfg.backgroundColor);
         config = cfg;
+        if (cfg.speakNames) speaker = new Speaker(this);
         wallpapers = cfg.wallpapers;
         wallpaperIntervalMs = cfg.wallpaperIntervalMs;
         placesMode = cfg.places;
@@ -365,6 +368,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             Backdrop.watch(pill);
             pill.setOnFocusChangeListener((v, has) -> {
                 if (has) moveTopHighlight(v);
+                if (has && speaker != null) speaker.sayView(v);
             });
         }
         // The apps rise into place on the first launch after the TV starts, and only then. Setting
@@ -770,6 +774,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onPause() {
+        if (speaker != null) speaker.stop();
         super.onPause();
         unregisterReceiver(packageReceiver);
         handler.removeCallbacks(minuteTick);
@@ -799,6 +804,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onDestroy() {
+        if (speaker != null) speaker.shutdown();
         super.onDestroy();
         wallDecoder.shutdownNow();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
@@ -822,6 +828,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onTileFocused(int position, View card) {
+        if (speaker != null) speaker.say(adapter.labelAt(position));
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
         // Tile rect in root coordinates, using layout positions (ignores the scale animation).
@@ -1818,6 +1825,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             last = row;
             row.setOnFocusChangeListener((v, has) -> {
                 if (has) glideToMenuRow(panel, rows, v);
+                if (has && speaker != null) speaker.sayView(v);
             });
         }
         final View top = first, bottom = last;

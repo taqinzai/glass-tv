@@ -32,6 +32,11 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `rows_below_dock` | 0 to 3 | Grid rows left visible under the dock |
 | `shamsi_date` | bool | Show the Solar Hijri date above the Gregorian one |
 | `prayer_zone` | string | JAKIM zone for the prayer-times line under the clock, e.g. `"TRG01"` (Kuala Terengganu), `"WLY01"` (Kuala Lumpur); `""` hides it. Times come from JAKIM e-Solat, fetched once a month |
+| `prayer_arabic` | bool | Prayer names in Arabic and times in Arabic-Indic digits |
+| `azan` | bool | Play the azan at each prayer time, with a Stop button |
+| `azan_url` | string | Where to download the azan sound; a pushed `azan.mp3` (or `azan_subuh.mp3`) wins |
+| `places_theme` | string | `"islamic"` (mosques) or `"bing"` (Bing's weekly places) |
+| `speak_names` | bool | Say aloud the app or button the remote moves to |
 | `module_cards` | bool | Look for module cards and ask about them (`true`); `false` turns the feature off |
 | `reduced_motion` | bool | Calmer motion for weak GPUs: stiff highlight spring, no tile overshoot, short fades, no entrance replay |
 | `vpn_app` | string | App the network pill opens when a VPN is configured; also shows a red "VPN off" badge while no VPN is up |

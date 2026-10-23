@@ -67,6 +67,9 @@
     <!-- Pictures behind Home: "islamic" for mosques (Makkah, Madinah, Al-Aqsa, Malaysia and beyond, from
          Wikimedia Commons), "bing" for Bing's weekly places. A theme can set "places_theme". -->
     <string name="places_theme" translatable="false">islamic</string>
+    <!-- Say aloud the name of the app or button the remote moves to (text-to-speech, Malay when the TV has a
+         Malay voice), for someone who cannot see the screen well. A theme can set "speak_names". -->
+    <bool name="speak_names">true</bool>
     <!-- Optional VPN app the network pill opens (hold the pill for Wi-Fi settings), e.g. the package of the
          VPN you use. Empty: the pill opens Wi-Fi settings. The green VPN badge shows for any VPN either way;
          with an app set here, a red "VPN off" badge also shows while no VPN is up. -->
