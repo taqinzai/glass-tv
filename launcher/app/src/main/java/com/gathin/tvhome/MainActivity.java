@@ -271,7 +271,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         else launch.edit().putLong("boot_at", bootAt).apply();
         root.setBackgroundColor(cfg.backgroundColor);
         config = cfg;
-        if (cfg.speakNames) speaker = new Speaker(this);
+        if (cfg.speakNames) speaker = new Speaker(this, cfg.speakLanguage);
         wallpapers = cfg.wallpapers;
         wallpaperIntervalMs = cfg.wallpaperIntervalMs;
         placesMode = cfg.places;

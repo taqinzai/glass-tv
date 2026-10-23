@@ -13,8 +13,8 @@ import java.util.Locale;
 
 /**
  * Says the name of whatever the remote moves to (speak_names), for someone who cannot see the
- * screen well. Lighter than TalkBack: only the app or button name, in Malay when the TV has a Malay
- * voice (else Indonesian, else the TV's language). Waits a moment after each move, so scrolling past
+ * screen well. Lighter than TalkBack: only the app or button name, in the language of
+ * speak_language (English by default; "ms" for Malay), else the TV's own. Waits a moment after each move, so scrolling past
  * five tiles says only the one it stops on.
  */
 final class Speaker {
@@ -32,13 +32,14 @@ final class Speaker {
         pending = null;
     };
 
-    Speaker(Context ctx) {
+    Speaker(Context ctx, String language) {
+        final Locale wanted = language == null || language.isEmpty() ? Locale.ENGLISH : Locale.forLanguageTag(language);
         tts = new TextToSpeech(ctx.getApplicationContext(), status -> {
             if (status != TextToSpeech.SUCCESS) {
                 Log.w(TAG, "no text-to-speech engine");
                 return;
             }
-            for (Locale l : new Locale[]{new Locale("ms", "MY"), new Locale("ms"), new Locale("id", "ID"), Locale.getDefault()}) {
+            for (Locale l : new Locale[]{wanted, new Locale(wanted.getLanguage()), Locale.getDefault()}) {
                 int r = tts.setLanguage(l);
                 if (r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.i(TAG, "voice " + l);

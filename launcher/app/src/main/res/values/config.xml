@@ -70,6 +70,8 @@
     <!-- Say aloud the name of the app or button the remote moves to (text-to-speech, Malay when the TV has a
          Malay voice), for someone who cannot see the screen well. A theme can set "speak_names". -->
     <bool name="speak_names">true</bool>
+    <!-- Language of that voice: "en" English, "ms" Malay. A theme can set "speak_language". -->
+    <string name="speak_language" translatable="false">en</string>
     <!-- Optional VPN app the network pill opens (hold the pill for Wi-Fi settings), e.g. the package of the
          VPN you use. Empty: the pill opens Wi-Fi settings. The green VPN badge shows for any VPN either way;
          with an app set here, a red "VPN off" badge also shows while no VPN is up. -->
